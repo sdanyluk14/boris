@@ -3,25 +3,40 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import functions
 
-c = pd.read_csv (r'chelsea_matches_22_23.txt')
+plt.style.use('dark_background')
 
-print(c.columns)
+c23 = pd.read_csv (r'chelsea_history_aggregate/chelsea_matches_22_23.txt')
+c23 = c23.loc[~c23['xG'].isnull()]
+c23['xDf'] = c23['xG'] - c23['xGA']
 
-
-def rolling_avg(df, col) -> float:
-    return df[col].mean()
-
-print(c.iloc[:5])
-print(c.columns)
+print(c23.columns)
 
 
-print(create_lookback_df(c, ['xG', 'GF', 'xGA', 'GA'], 10))
-print(rolling_avg(c, 'xG'))
+print(functions.create_lookback_df(c23, ['xG', 'GF', 'xGA', 'GA'], 10))
+print(functions.rolling_avg(c23, 'xG'))
 
-dfo = create_lookback_df(c, ['xG', 'GF', 'xGA', 'GA'], 10)
+dfo = functions.create_lookback_df(c23.loc[c['Comp'] == 'Premier League'].reset_index(), 
+                                ['xG', 'GF', 'xGA', 'GA', 'xDf'], 10)
+dfo['Date'] = c23['Date'][10:]
 
 #%%
-plt.plot(dfo['xG'])
-plt.plot(dfo['xGA'])
+print(dfo.index())
+
+plt.plot(dfo['xG'], color = 'green')
+plt.scatter(dfo['xG'], color = 'green')
+plt.plot(dfo['xGA'], color = 'red')
+plt.scatter(dfo['xGA'], color = 'red')
 plt.show()
+
+plt.plot(dfo['xDf'], color = 'green')
+plt.show()
+
+# %%
+prem = c.loc[c['Comp'] == 'Premier League'].reset_index()
+print(prem.columns)
+plt.plot(prem['Date'], prem['xDf'])
+plt.xticks(rotation=90)
+
+
+
 # %%
